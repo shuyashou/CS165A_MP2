@@ -69,13 +69,43 @@ class ReflexAgent(Agent):
         newPos = successorGameState.getPacmanPosition(self.index)
         newFood = successorGameState.getFood()
         newGhostStates = successorGameState.getGhostStates()
-        
-        if len(newFood.asList()):
-            fooddist = util.manhattanDistance(newPos, newFood.asList()[0])
-        else:
+        #Calculate remaining number of food&Capsules:
+        newFoodCount = successorGameState.getNumFood()
+        newCapsuleCount = len(successorGameState.getCapsules())
+        #Calculate the distance of the furthest food from pacman current location:
+        newFoodList = newFood.asList()
+        fooddist = -1
+        if len(newFoodList)==0:
             fooddist = 0
+        else:
+            for food in newFoodList:
+                distance = util.manhattanDistance(newPos, food)
+                if distance < fooddist:
+                    fooddist = distance
+        #Calculate the total distance of ghosts from pacman current location:
+        newGhostPosList = successorGameState.getGhostPositions()
+        distanceOfGhosts = -1
+        if len(newGhostPosList)==0:
+            distanceOfGhosts = 0
+        else:
+            for ghostPos in newGhostPosList:
+                distance += util.manhattanDistance(newPos, ghostPos)
+            distanceOfGhosts = distance
+        #If ghost is nearby (within distance of 1), also take such situation into consideration, the closer the smaller likelihood to choose this move
+        dangerousIndex = -1
+        if len(newGhostPosList)==0:
+            dangerousIndex = 0
+        else:
+            if util.manhattanDistance(newPos, ghostPos) == 1:
+                dangerousIndex += 0.5
+            elif util.manhattanDistance(newPos, ghostPos) == 0:
+                dangerousIndex += 1.0
+            else:
+                dangerousIndex +=0
+        
+        
 
-        return successorGameState.getScore()[self.index] - fooddist
+        return successorGameState.getScore()[self.index] - newFoodCount/100.0 - newCapsuleCount/2.0 + 1/fooddist - 1/distanceOfGhosts - dangerousIndex
 
 def scoreEvaluationFunction(currentGameState, index):
     """
