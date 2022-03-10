@@ -113,26 +113,36 @@ class MultiPacmanAgent(MultiAgentSearchAgent):
     """
     You implementation here
     """
-
     def getAction(self, gameState):
-        index = self.index # pacman index
         """
-        Returns the expectimax action using self.depth and self.evaluationFunction
-
-        All ghosts should be modeled as choosing uniformly at random from their
-        legal moves.
-
-        Some functions you may need:
-        if gameState.isWin() or gameState.isLose():
-            return self.evaluationFunction(gameState)
-        legalMoves = gameState.getLegalActions(agent)
-        legalNextState = [gameState.generateSuccessor(agent, action)
-                          for action in legalMoves]
+          Returns the expectimax action using self.depth and self.evaluationFunction
+          All ghosts should be modeled as choosing uniformly at random from their
+          legal moves.
         """
         "*** YOUR CODE HERE ***"
-        print("Number of Pacmans:", gameState.getNumPacman(), ", Number of ghosts:", gameState.getNumGhosts())
+        def expectimax(agent, depth, gameState):
+            if gameState.isLose() or gameState.isWin() or depth == self.depth:  # return the utility in case the defined depth is reached or the game is won/lost.
+                return self.evaluationFunction(gameState)
+            if agent == 0:  # maximizing for pacman
+                return max(expectimax(1, depth, gameState.generateSuccessor(agent, newState)) for newState in gameState.getLegalActions(agent))
+            else:  # performing expectimax action for ghosts/chance nodes.
+                nextAgent = agent + 1  # calculate the next agent and increase depth accordingly.
+                if gameState.getNumAgents() == nextAgent:
+                    nextAgent = 0
+                if nextAgent == 0:
+                    depth += 1
+                return sum(expectimax(nextAgent, depth, gameState.generateSuccessor(agent, newState)) for newState in gameState.getLegalActions(agent)) / float(len(gameState.getLegalActions(agent)))
 
-        util.raiseNotDefined()
+        """Performing maximizing task for the root node i.e. pacman"""
+        maximum = float("-inf")
+        action = Directions.WEST
+        for agentState in gameState.getLegalActions(0):
+            utility = expectimax(1, 0, gameState.generateSuccessor(0, agentState))
+            if utility > maximum or maximum == float("-inf"):
+                maximum = utility
+                action = agentState
+
+        return action
         
 class RandomAgent(MultiAgentSearchAgent):
     def getAction(self, gameState):
