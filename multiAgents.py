@@ -52,59 +52,7 @@ class ReflexAgent(Agent):
         return legalMoves[chosenIndex]
 
     def evaluationFunction(self, currentGameState, action):
-        """
-        # Useful information you can extract from a GameState (pacman.py)
-        successorGameState = currentGameState.generatePacmanSuccessor(self.index, action)
-        newPos = successorGameState.getPacmanPosition(self.index)
-        newFood = successorGameState.getFood()
-        newGhostStates = successorGameState.getGhostStates()
-        #Calculate remaining number of food&Capsules:
-        newFoodCount = successorGameState.getNumFood()
-        newCapsuleCount = len(successorGameState.getCapsules())
-        #Calculate the distance of the furthest food from pacman current location:
-        newFoodList = newFood.asList()
-        fooddist = -1
-        if len(newFoodList)==0:
-            fooddist = 0
-        else:
-            for food in newFoodList:
-                distance = util.manhattanDistance(newPos, food)
-                if distance < fooddist:
-                    fooddist = distance
-        #Calculate the total distance of ghosts from pacman current location:
-        newGhostPosList = successorGameState.getGhostPositions()
-        #distanceOfGhosts = -1
-        dangerousSignal = 0
-        if len(newGhostPosList)==0:
-            dangerousSignal = 0
-        else:
-            for ghostPos in newGhostPosList:
-                if(util.manhattanDistance(newPos, ghostPos)<=3):
-                    dangerousSignal += 1
-                else:
-                    dangerousSignal += 0
-            #distanceOfGhosts = distance
-        #If ghost is nearby (within distance of 1), also take such situation into consideration, the closer the smaller likelihood to choose this move
-        dangerousIndex = -1
-        if len(newGhostPosList)==0:
-            dangerousIndex = 0
-        else:
-            for ghostPos in newGhostPosList:
-                if util.manhattanDistance(newPos, ghostPos) == 2:
-                    dangerousIndex += 2.0
-                elif util.manhattanDistance(newPos, ghostPos) == 1:
-                    dangerousIndex += 3.0
-                elif util.manhattanDistance(newPos, ghostPos) == 0:
-                    dangerousIndex += 4.0
-                else:
-                    dangerousIndex = 0
 
-        if(dangerousSignal<=0):
-            return successorGameState.getScore()[self.index] - newFoodCount/100.0 - newCapsuleCount/2.0 + 1/float(fooddist)
-        
-        else:
-            return successorGameState.getScore()[self.index] - newFoodCount/100.0 - newCapsuleCount/2.0 + 1/float(fooddist) - dangerousIndex
-        """
         successorGameState = currentGameState.generatePacmanSuccessor(self.index, action)
         newPos = successorGameState.getPacmanPosition(self.index)
         newFood = successorGameState.getFood()
@@ -154,10 +102,63 @@ class MultiPacmanAgent(MultiAgentSearchAgent):
     """
     You implementation here
     """
-    def minimax(self, gameState,idx, depth):
-     
+    def myEvaluationFunction(self, currentGameState):
+        # Useful information you can extract from a GameState (pacman.py)
+        
+        newPos = currentGameState.getPacmanPosition(self.index)
+        newFood = currentGameState.getFood()
+        newGhostStates = currentGameState.getGhostStates()
+        #Calculate remaining number of food&Capsules:
+        newFoodCount = currentGameState.getNumFood()
+        newCapsuleCount = len(currentGameState.getCapsules())
+        #Calculate the distance of the furthest food from pacman current location:
+        newFoodList = newFood.asList()
+        fooddist = -1
+        if len(newFoodList)==0:
+            fooddist=1
+        else:
+            for food in newFoodList:
+                distance = util.manhattanDistance(newPos, food)
+                if distance <= fooddist:
+                    fooddist = distance
+        #Calculate the total distance of ghosts from pacman current location:
+        newGhostPosList = currentGameState.getGhostPositions()
+        #distanceOfGhosts = -1
+        dangerousSignal = 0
+        if len(newGhostPosList)==0:
+            dangerousSignal = 0
+        else:
+            for ghostPos in newGhostPosList:
+                if(util.manhattanDistance(newPos, ghostPos)<=3):
+                    dangerousSignal += 1
+                else:
+                    dangerousSignal += 0
+            #distanceOfGhosts = distance
+        #If ghost is nearby (within distance of 1), also take such situation into consideration, the closer the smaller likelihood to choose this move
+        dangerousIndex = -1
+        if len(newGhostPosList)==0:
+            dangerousIndex = 0
+        else:
+            for ghostPos in newGhostPosList:
+                if util.manhattanDistance(newPos, ghostPos) == 2:
+                    dangerousIndex += 2.0
+                elif util.manhattanDistance(newPos, ghostPos) == 1:
+                    dangerousIndex += 3.0
+                elif util.manhattanDistance(newPos, ghostPos) == 0:
+                    dangerousIndex += 4.0
+                else:
+                    dangerousIndex = 0
+
+        if(dangerousSignal<=0):
+            return currentGameState.getScore()[self.index] - newFoodCount/80.0 - newCapsuleCount/2.0 + 1/float(fooddist)
+        
+        else:
+            return currentGameState.getScore()[self.index] - newFoodCount/100.0 - newCapsuleCount/2.0 + 1/float(fooddist) - dangerousIndex
+
+
+    def minimax(self, gameState,idx, depth):     
         if depth >= self.depth  or gameState.isWin() or gameState.isLose():
-            return self.evaluationFunction(gameState)
+            return self.myEvaluationFunction(gameState)
         if idx == 0:  # pacman
             maxval = float('-inf')  
             actions = gameState.getLegalActions(idx) 
