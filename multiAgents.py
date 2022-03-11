@@ -84,28 +84,39 @@ class ReflexAgent(Agent):
                     fooddist = distance
         #Calculate the total distance of ghosts from pacman current location:
         newGhostPosList = successorGameState.getGhostPositions()
-        distanceOfGhosts = -1
+        #distanceOfGhosts = -1
+        dangerousSignal = 0
         if len(newGhostPosList)==0:
-            distanceOfGhosts = 0
+            dangerousSignal = 0
         else:
             for ghostPos in newGhostPosList:
-                distance += util.manhattanDistance(newPos, ghostPos)
-            distanceOfGhosts = distance
+                if(util.manhattanDistance(newPos, ghostPos)<=3):
+                    dangerousSignal += 1
+                else:
+                    dangerousSignal += 0
+            #distanceOfGhosts = distance
         #If ghost is nearby (within distance of 1), also take such situation into consideration, the closer the smaller likelihood to choose this move
         dangerousIndex = -1
         if len(newGhostPosList)==0:
             dangerousIndex = 0
         else:
-            if util.manhattanDistance(newPos, ghostPos) == 1:
-                dangerousIndex += 0.5
-            elif util.manhattanDistance(newPos, ghostPos) == 0:
-                dangerousIndex += 1.0
-            else:
-                dangerousIndex +=0
-        
-        
+            for ghostPos in newGhostPosList:
+                if util.manhattanDistance(newPos, ghostPos) == 2:
+                    dangerousIndex += 2.0
+                elif util.manhattanDistance(newPos, ghostPos) == 1:
+                    dangerousIndex += 3.0
+                elif util.manhattanDistance(newPos, ghostPos) == 0:
+                    dangerousIndex += 4.0
+                else:
+                    dangerousIndex = 0
 
-        return successorGameState.getScore()[self.index] - newFoodCount/100.0 - newCapsuleCount/2.0 + 1/fooddist - 1/distanceOfGhosts - dangerousIndex
+        if(dangerousSignal<=0):
+            return successorGameState.getScore()[self.index] - newFoodCount/100.0 - newCapsuleCount/2.0 + 1/float(fooddist)
+        
+        else:
+            return successorGameState.getScore()[self.index] - newFoodCount/100.0 - newCapsuleCount/2.0 + 1/float(fooddist) - dangerousIndex
+        
+    
 
 def scoreEvaluationFunction(currentGameState, index):
     """
@@ -152,7 +163,7 @@ class MultiPacmanAgent(MultiAgentSearchAgent):
             actions = gameState.getLegalActions(idx) 
             for action in actions:
                 next_state = gameState.generateSuccessor(idx, action)  
-                tmpval = self.minimax(next_state,1, depth + 1)  
+                tmpval = self.minimax(next_state,1, depth) #+ 1)  
                 if maxval < tmpval:
                     maxval=tmpval
             return maxval
@@ -163,8 +174,8 @@ class MultiPacmanAgent(MultiAgentSearchAgent):
             actions = gameState.getLegalActions(idx)
             for action in actions:
                 next_state = gameState.generateSuccessor(idx, action)
-                if idx >= gameState.getNumAgents() - 1: 
-                    tmpvals.append(self.minimax(next_state, 0,depth ))
+                if idx == gameState.getNumAgents() - 1: 
+                    tmpvals.append(self.minimax(next_state, 0,depth+1 ))
                 else:  
                     tmpvals.append(self.minimax(next_state,idx+1, depth)) 
                 tmpval = min(tmpvals)
@@ -179,9 +190,9 @@ class MultiPacmanAgent(MultiAgentSearchAgent):
         ret_action = None
         maxval = float('-inf')
         
-        for action in gameState.getLegalPacmanActions(0):
+        for action in gameState.getLegalActions(0):
             next_state = gameState.generateSuccessor(0, action)
-            tmpval = self.minimax(gameState=next_state,idx=0, depth=0)
+            tmpval = self.minimax(next_state,1, 0)
             
             if  maxval < tmpval:
                 maxval = tmpval
