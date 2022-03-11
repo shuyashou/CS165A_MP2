@@ -175,9 +175,9 @@ class MultiPacmanAgent(MultiAgentSearchAgent):
             for action in actions:
                 next_state = gameState.generateSuccessor(idx, action)
                 if idx == gameState.getNumAgents() - 1: 
-                    tmpvals.append(self.minimax(next_state, 0,depth+1 ))
-##                else:  
-##                    tmpvals.append(self.minimax(next_state,idx+1, depth)) 
+                    tmpvals.append(self.minimax(next_state, 0,depth) )
+                else:  
+                    tmpvals.append(self.minimax(next_state,idx+1, depth+1)) 
                 tmpval = min(tmpvals)
                 if minval > tmpval:
                     minval=tmpval
