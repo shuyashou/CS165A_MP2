@@ -53,17 +53,6 @@ class ReflexAgent(Agent):
 
     def evaluationFunction(self, currentGameState, action):
         """
-        Design a better evaluation function here.
-
-        The evaluation function takes in the current and proposed successor
-        GameStates (pacman.py) and returns a number, where higher numbers are better.
-
-        The code below extracts some useful information from the state, like the
-        remaining food (newFood) and Pacman position after moving (newPos).
-
-        Print out these variables to see what you're getting, then combine them
-        to create a masterful evaluation function.
-        """
         # Useful information you can extract from a GameState (pacman.py)
         successorGameState = currentGameState.generatePacmanSuccessor(self.index, action)
         newPos = successorGameState.getPacmanPosition(self.index)
@@ -115,7 +104,18 @@ class ReflexAgent(Agent):
         
         else:
             return successorGameState.getScore()[self.index] - newFoodCount/100.0 - newCapsuleCount/2.0 + 1/float(fooddist) - dangerousIndex
+        """
+        successorGameState = currentGameState.generatePacmanSuccessor(self.index, action)
+        newPos = successorGameState.getPacmanPosition(self.index)
+        newFood = successorGameState.getFood()
+        newGhostStates = successorGameState.getGhostStates()
         
+        if len(newFood.asList()):
+            fooddist = util.manhattanDistance(newPos, newFood.asList()[0])
+        else:
+            fooddist = 0
+
+        return successorGameState.getScore()[self.index] - fooddist
     
 
 def scoreEvaluationFunction(currentGameState, index):
