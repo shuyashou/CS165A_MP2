@@ -156,6 +156,7 @@ class MultiPacmanAgent(MultiAgentSearchAgent):
             return currentGameState.getScore()[self.index] - newFoodCount/100.0 - newCapsuleCount + 1/float(fooddist) - dangerousIndex
 
 
+
     def minimax(self, gameState,idx, depth):     
         if depth >= self.depth  or gameState.isWin() or gameState.isLose():
             return self.myEvaluationFunction(gameState)
