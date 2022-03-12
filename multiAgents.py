@@ -150,10 +150,10 @@ class MultiPacmanAgent(MultiAgentSearchAgent):
                     dangerousIndex = 0
 
         if(dangerousSignal<=0):
-            return currentGameState.getScore()[self.index] - newFoodCount/80.0 - newCapsuleCount/2.0 + 1/float(fooddist)
+            return currentGameState.getScore()[self.index] - newFoodCount/80.0 - newCapsuleCount + 1/float(fooddist)
         
         else:
-            return currentGameState.getScore()[self.index] - newFoodCount/100.0 - newCapsuleCount/2.0 + 1/float(fooddist) - dangerousIndex
+            return currentGameState.getScore()[self.index] - newFoodCount/100.0 - newCapsuleCount + 1/float(fooddist) - dangerousIndex
 
 
     def minimax(self, gameState,idx, depth):     
